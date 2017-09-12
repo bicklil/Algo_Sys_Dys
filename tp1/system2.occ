@@ -1,0 +1,46 @@
+#USE "course.lib"
+
+PROC source(CHAN OF INT c,VAL INT init)
+  WHILE TRUE
+    c ! init
+:
+
+PROC seuillage(CHAN OF INT c,CHAN OF BOOL d, VAL INT seuil)
+  INT x:
+  WHILE TRUE
+    SEQ
+      c ? x
+      IF
+        x > seuil
+          d ! TRUE
+        x < seuil
+          d ! FALSE
+:
+
+PROC affichage(CHAN OF BOOL c, CHAN OF BYTE d)
+  BOOL x:
+  WHILE TRUE
+    SEQ
+      c ? x
+      IF
+        x
+          d ! 1
+        NOT x
+          d ! 0
+:
+
+PROC system(CHAN OF BYTE keyboard,screen,error)
+  CHAN OF INT x:
+  CHAN OF BOOL y:
+  CHAN OF BYTE z:
+  BYTE res:
+  PAR
+    source(x,4)
+    seuillage(x,y,5)
+    affichage(y,z)
+    WHILE TRUE
+      SEQ
+        z ? res
+        out.byte(res,0,screen)
+        out.string("*n",0,screen)
+:
