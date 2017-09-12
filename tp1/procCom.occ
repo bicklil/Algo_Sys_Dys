@@ -1,0 +1,17 @@
+PROC A(CHAN OF INT out)
+  SEQ
+    out ! 3
+:
+
+PROC B(CHAN OF INT in)
+  INT x:
+  SEQ
+    in ? x
+:
+
+PROC system (CHAN OF BYTE keyboard,screen,error)
+  CHAN OF INT c:
+  PAR 
+    A(c)
+    B(c)
+:  

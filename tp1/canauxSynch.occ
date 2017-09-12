@@ -1,0 +1,15 @@
+PROC A(CHAN OF INT c1, c2, VAL INT init)
+  INT x1, x2:
+  SEQ  
+    x2 := init
+    PAR
+      c1 ? x1
+      c2 ! x2
+:
+
+PROC system(CHAN OF BYTE keyboard,screen,error)
+  CHAN OF INT c,d:
+  PAR 
+    A(c,d,6)
+    A(d,c,7)
+:  
