@@ -1,0 +1,48 @@
+#USE "course.lib"
+
+PROC source(CHAN OF INT c)
+  VAL [] INT image IS [4,10,9,0,1,56,17,20]:
+  WHILE TRUE
+    SEQ i=4 FOR (SIZE image) - 4
+      c ! image[i]
+:
+
+PROC seuillage(CHAN OF INT c,CHAN OF BOOL d, VAL INT seuil)
+  INT x:
+  WHILE TRUE
+    SEQ
+      c ? x
+      IF
+        x > seuil
+          d ! TRUE
+        x < seuil
+          d ! FALSE
+:
+
+PROC affichage(CHAN OF BOOL c, CHAN OF BYTE d)
+  BOOL x:
+  WHILE TRUE
+    SEQ
+      c ? x
+      IF
+        x
+          d ! 1
+        NOT x
+          d ! 0
+:
+
+PROC system(CHAN OF BYTE keyboard,screen,error)
+  CHAN OF INT x:
+  CHAN OF BOOL y:
+  CHAN OF BYTE z:
+  BYTE res:
+  PAR
+    source(x)
+    seuillage(x,y,5)
+    affichage(y,z)
+    WHILE TRUE
+      SEQ
+        z ? res
+        out.byte(res,0,screen)
+        out.string("*n",0,screen)
+:
