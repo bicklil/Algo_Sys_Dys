@@ -16,7 +16,7 @@ PROC histoBloc(CHAN OF INT input,CHAN OF INT output,CHAN OF INT decal,INT valeur
         IF
           x = valeur
             compteur := compteur +1
-          valeur = 19
+          valeur = 9
             SKIP
           x > valeur
             decal ! x
@@ -27,7 +27,7 @@ PROC histoBloc(CHAN OF INT input,CHAN OF INT output,CHAN OF INT decal,INT valeur
 :
 
 PROC affichage([]CHAN OF INT entree,CHAN OF BYTE sortie)
-  INT[20] temp:
+  [20]INT temp:
   PAR i=0 FOR 20
     SEQ
       entree[i] ? temp[i]
@@ -38,13 +38,11 @@ PROC affichage([]CHAN OF INT entree,CHAN OF BYTE sortie)
 :
 
 PROC system(CHAN OF BYTE screen,keyboard,error)
-  CHAN OF INT Source.Histo:
-  CHAN hh[20]
-  CHAN ha[20] 
+  [11]CHAN OF INT hh:
+  [10]CHAN OF INT ha:
   PAR
-    source(Source.Histo)
+    source(hh[0])
     affichage(ha,screen)
-    histoBloc(Source.Histo,ha[0],hh[0],0)
-    PAR i=0 FOR 19
-      histoBloc(hh[i-1],ha[i-1],hh[i],i)
+    PAR i=0 FOR 10
+      histoBloc(hh[i],ha[i+1],hh[i+1],i)
 :
