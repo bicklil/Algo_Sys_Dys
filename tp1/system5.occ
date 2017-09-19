@@ -1,22 +1,23 @@
 #USE "course.lib"
 
 PROC source(CHAN OF INT c)
-  VAL [] INT image IS [4,10,9,0,1,56,17,20]:
-  WHILE TRUE
-    SEQ i=4 FOR (SIZE image) - 4
-      c ! image[i]
+  VAL [] INT image IS [4,10,9,0,1,56,17,20,-1]:
+  SEQ i=0 FOR SIZE image
+    c ! image[i]
 :
 
 PROC seuillage(CHAN OF INT c,CHAN OF BOOL d, VAL INT seuil)
   INT x:
-  WHILE TRUE
-    SEQ
-      c ? x
-      IF
-        x > seuil
-          d ! TRUE
-        x < seuil
-          d ! FALSE
+  SEQ
+    c ? x
+    WHILE (x <> (-1))
+      SEQ
+        IF
+          x > seuil
+            d ! TRUE
+          x < seuil
+            d ! FALSE
+        c ? x
 :
 
 PROC affichage(CHAN OF BOOL c, CHAN OF BYTE d)
