@@ -1,0 +1,50 @@
+#USE "course.lib"
+
+PROC source(CHAN OF INT exit)
+  VAL [] INT image IS [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,0,-1]:
+  SEQ i=0 FOR SIZE image
+    exit ! image[i]
+:
+
+PROC histoBloc(CHAN OF INT input,CHAN OF INT output,CHAN OF INT decal,INT valeur)
+  INT x,compteur:
+  SEQ
+    compteur := 0
+    input ? x
+    WHILE ( x <> (-1))
+      SEQ
+        IF
+          x = valeur
+            compteur := compteur +1
+          valeur = 19
+            SKIP
+          x > valeur
+            decal ! x
+          TRUE
+            SKIP
+        input ? x
+    output ! x
+:
+
+PROC affichage([]CHAN OF INT entree,CHAN OF BYTE sortie)
+  INT[20] temp:
+  PAR i=0 FOR 20
+    SEQ
+      entree[i] ? temp[i]
+      sortie ! i
+      sortie ! ':'
+      sortie ! temp[i]
+      sortie ! '*n'
+:
+
+PROC system(CHAN OF BYTE screen,keyboard,error)
+  CHAN OF INT Source.Histo:
+  CHAN hh[20]
+  CHAN ha[20] 
+  PAR
+    source(Source.Histo)
+    affichage(ha,screen)
+    histoBloc(Source.Histo,ha[0],hh[0],0)
+    PAR i=0 FOR 19
+      histoBloc(hh[i-1],ha[i-1],hh[i],i)
+:

@@ -21,22 +21,17 @@ PROC affichage(CHAN OF BOOL c, CHAN OF BYTE d)
     c ? x
     IF
       x
-        d ! 1
+        out.byte(1,0,d)
       NOT x
-        d ! 0
+        out.byte(0,0,d)
 :
 
 PROC system(CHAN OF BYTE keyboard,screen,error)
   CHAN OF INT x:
   CHAN OF BOOL y:
-  CHAN OF BYTE z:
   BYTE res:
   PAR
     source(x,4)
     seuillage(x,y,5)
-    affichage(y,z)
-    SEQ
-      z ? res
-      out.byte(res,0,screen)
-      out.string("*n",0,screen)
+    affichage(y,screen)
 :
