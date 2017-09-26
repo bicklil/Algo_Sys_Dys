@@ -46,7 +46,7 @@ PROC system(CHAN OF BYTE keyboard,screen,error)
   PAR
     source(hh[0])
     affichage(ha,screen)
-    PAR i=0 FOR 256
+    PAR i=0 FOR 10
       histoBloc(hh[i],ha[i],hh[i+1],i)
     WHILE TRUE
       hh[10] ? poubelle
