@@ -13,7 +13,7 @@ PROC histoBloc(CHAN OF INT input,CHAN OF INT output,CHAN OF INT decal,VAL INT va
     SEQ
       compteur := 0
       input ? x
-      WHILE ( x <> (-1))
+      WHILE ( compteur <> (2))
         SEQ
           IF
             x = valeur
@@ -30,7 +30,7 @@ PROC histoBloc(CHAN OF INT input,CHAN OF INT output,CHAN OF INT decal,VAL INT va
 PROC affichage([]CHAN OF INT entree,CHAN OF BYTE sortie)
   INT data:
   WHILE TRUE
-    ALT i=0 FOR 256
+    ALT i=0 FOR 10
       entree[i] ? data
         SEQ
           out.int(i,0,sortie)
@@ -40,8 +40,8 @@ PROC affichage([]CHAN OF INT entree,CHAN OF BYTE sortie)
 :
 
 PROC system(CHAN OF BYTE keyboard,screen,error)
-  [257]CHAN OF INT hh:
-  [256]CHAN OF INT ha:
+  [11]CHAN OF INT hh:
+  [10]CHAN OF INT ha:
   INT poubelle:
   PAR
     source(hh[0])
@@ -49,5 +49,5 @@ PROC system(CHAN OF BYTE keyboard,screen,error)
     PAR i=0 FOR 256
       histoBloc(hh[i],ha[i],hh[i+1],i)
     WHILE TRUE
-      hh[256] ? poubelle
+      hh[10] ? poubelle
 :
