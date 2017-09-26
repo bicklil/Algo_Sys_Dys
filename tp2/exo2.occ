@@ -1,7 +1,7 @@
 #USE "course.lib"
 
 PROC source(CHAN OF INT exit)
-  VAL [] INT image IS [1,80,25,5,2,3,4,5,6,7,8,9,5,4,5,3,4,5,6,7,8,9,0,-1]:
+  VAL [] INT image IS [1,2,3,4,5,6,7,8,9,5,4,5,3,4,5,6,7,8,9,0,-1]:
   WHILE TRUE
     SEQ i=0 FOR SIZE image
       exit ! image[i]
@@ -23,20 +23,20 @@ PROC histoBloc(CHAN OF INT input,CHAN OF INT output,CHAN OF INT decal,VAL INT va
             TRUE
               SKIP
           input ? x
-      decal ! -1
       output ! compteur
+      decal ! x
 :
 
 PROC affichage([]CHAN OF INT entree,CHAN OF BYTE sortie)
   INT data:
   WHILE TRUE
-    SEQ i=0 FOR 256
-      SEQ
-        entree[i] ? data
-        out.int(i,0,sortie)
-        sortie ! ':'
-        out.int(data,0,sortie)
-        sortie ! '*n'
+    ALT i=0 FOR 256
+      entree[i] ? data
+        SEQ
+          out.int(i,0,sortie)
+          sortie ! ':'
+          out.int(data,0,sortie)
+          sortie ! '*n'
 :
 
 PROC system(CHAN OF BYTE keyboard,screen,error)
