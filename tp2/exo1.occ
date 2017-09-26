@@ -1,48 +1,53 @@
 #USE "course.lib"
 
 PROC source(CHAN OF INT exit)
-  VAL [] INT image IS [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,0,-1]:
-  SEQ i=0 FOR SIZE image
-    exit ! image[i]
+  VAL [] INT image IS [1,2,3,4,5,6,7,8,9,5,4,5,3,4,5,6,7,8,9,0,-1]:
+  WHILE TRUE
+    SEQ i=0 FOR SIZE image
+      exit ! image[i]
 :
 
-PROC histoBloc(CHAN OF INT input,CHAN OF INT output,CHAN OF INT decal,INT valeur)
+PROC histoBloc(CHAN OF INT input,CHAN OF INT output,CHAN OF INT decal,VAL INT valeur)
   INT x,compteur:
-  SEQ
-    compteur := 0
-    input ? x
-    WHILE ( x <> (-1))
-      SEQ
-        IF
-          x = valeur
-            compteur := compteur +1
-          valeur = 9
-            SKIP
-          x > valeur
-            decal ! x
-          TRUE
-            SKIP
-        input ? x
-    output ! x
+  WHILE TRUE
+    SEQ
+      compteur := 0
+      input ? x
+      WHILE ( x <> (-1))
+        SEQ
+          IF
+            x = valeur
+              compteur := compteur +1
+            x > valeur
+              decal ! x
+            TRUE
+              SKIP
+          input ? x
+      output ! compteur
+      decal ! -1
 :
 
 PROC affichage([]CHAN OF INT entree,CHAN OF BYTE sortie)
-  [20]INT temp:
-  PAR i=0 FOR 20
-    SEQ
-      entree[i] ? temp[i]
-      sortie ! i
-      sortie ! ':'
-      sortie ! temp[i]
-      sortie ! '*n'
+  [10]INT temp:
+  WHILE TRUE
+    SEQ i=0 FOR 10
+      SEQ
+        entree[i] ? temp[i]
+        out.int(i,0,sortie)
+        sortie ! ':'
+        out.int(temp[i],0,sortie)
+        sortie ! '*n'
 :
 
-PROC system(CHAN OF BYTE screen,keyboard,error)
+PROC system(CHAN OF BYTE keyboard,screen,error)
   [11]CHAN OF INT hh:
   [10]CHAN OF INT ha:
+  INT poubelle:
   PAR
     source(hh[0])
     affichage(ha,screen)
     PAR i=0 FOR 10
-      histoBloc(hh[i],ha[i+1],hh[i+1],i)
+      histoBloc(hh[i],ha[i],hh[i+1],i)
+    WHILE TRUE
+      hh[10] ? poubelle
 :
