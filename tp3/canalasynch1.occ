@@ -1,0 +1,75 @@
+#INCLUDE "consts.inc"
+#USE "course.lib"
+
+VAL INT Temmetteur IS 1:
+VAL INT Trecepteur IS 100:
+VAL INT PASTEMPS IS 10000:
+VAL INT TailleMax IS 100:
+
+--procedure de temporisation
+PROC Tempo (VAL INT pas)
+  TIMER clock :
+  INT timeNow :
+  INT timeToWait :
+  SEQ
+    clock ? timeNow
+    timeToWait := timeNow + (pas*PASTEMPS)
+    clock ? AFTER timeToWait
+:
+
+PROC canalAsync(CHAN OF BYTE sendChan, rcvReqChan, rcvDataChan, VAL INT room)
+  --room : nb de cases disponibles dans la fifo
+  
+  INT occupation :
+  BYTE m:
+  BYTE req:
+  [TailleMax]BYTE fifo:
+  INT indiceEcrire:
+  INT indiceLecture:
+  SEQ
+    occupation := 0
+    indiceLecture :=0
+    indiceEcrire:=0
+    WHILE TRUE
+      ALT
+        sendChan ? m
+          SEQ
+            fifo[indiceEcrire] := m
+            indiceEcrire := (indiceEcrire +1) REM room
+            occupation := occupation+1
+      
+        occupation > 0 & rcvReqChan ? req
+          SEQ
+            m := fifo[indiceLecture]
+            indiceLecture := (indiceLecture +1) REM room
+            rcvDataChan ! m
+            occupation := occupation-1
+:
+
+PROC emetteur(CHAN OF BYTE send)
+  VAL [] BYTE phrase IS "essai de transfert *n":
+  WHILE TRUE
+    SEQ i=0 FOR SIZE phrase
+      SEQ
+        send ! phrase[i]
+        Tempo(Temmetteur)
+:
+
+PROC recepteur(CHAN OF BYTE rcvReq,rcvData,screen)
+  BYTE m:
+  WHILE TRUE
+    SEQ
+      rcvReq ! 'r'
+      rcvData ? m
+      screen ! m
+      Tempo(Trecepteur)
+:
+
+PROC systeme (CHAN OF BYTE keyboard, screen, error)  
+  CHAN OF BYTE send,rcvReq,rcvData:
+  PAR
+    canalAsync(send, rcvReq, rcvData, 10)
+    emetteur (send)
+    recepteur (rcvReq, rcvData, error)
+:
+
