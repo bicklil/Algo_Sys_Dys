@@ -1,8 +1,8 @@
 #INCLUDE "consts.inc"
 #USE "course.lib"
 
-VAL INT Temmetteur IS 1:
-VAL INT Trecepteur IS 100:
+VAL INT Temmetteur IS 100:
+VAL INT Trecepteur IS 1:
 VAL INT PASTEMPS IS 10000:
 VAL INT TailleMax IS 100:
 
@@ -38,12 +38,17 @@ PROC canalAsync(CHAN OF BYTE sendChan, rcvReqChan, rcvDataChan, VAL INT room)
             indiceEcrire := (indiceEcrire +1) REM room
             occupation := occupation+1
       
-        occupation > 0 & rcvReqChan ? req
+        rcvReqChan ? req
           SEQ
-            m := fifo[indiceLecture]
-            indiceLecture := (indiceLecture +1) REM room
-            rcvDataChan ! m
-            occupation := occupation-1
+            IF 
+              occupation > 0
+                SEQ
+                  m := fifo[indiceLecture]
+                  indiceLecture := (indiceLecture +1) REM room
+                  rcvDataChan ! m
+                  occupation := occupation-1
+              TRUE
+                rcvDataChan ! '#'
 :
 
 PROC emetteur(CHAN OF BYTE send)
