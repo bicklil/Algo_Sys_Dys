@@ -1,0 +1,81 @@
+
+#USE "course.lib"
+
+VAL INT infini IS 16:
+
+VAL INT maxVois IS 3:
+
+--definition du type INFOROUTE pour les table de routage
+DATA TYPE INFOROUTE
+  RECORD
+    INT indVois:
+    INT cout:
+: 
+
+DATA TYPE TABROUTE IS [7] INFOROUTE:
+
+
+
+  
+--definition de la procedure pour le multiplexage de l'impression
+--affiche la table de routage d'un noeud 
+PROC ringScreen([] CHAN OF  TABROUTE theirScreens, CHAN OF BYTE screen)
+  TABROUTE table:
+  SEQ
+    WHILE TRUE
+      ALT i=0 FOR SIZE theirScreens
+        theirScreens[i] ? table
+          SEQ
+            out.string ("table du routeur :", 10, screen)
+            out.number (i, 2, screen)
+            screen ! '*n'
+            SEQ j=0 FOR 7
+              SEQ
+                out.string ("destination :",15, screen)
+                out.number (j, 2, screen)
+                screen ! '*n'    
+                out.string ("Port de sortie:",13, screen)
+                out.number (table[j][indVois], 2, screen)
+                screen ! '*n'
+                out.string ("cout :",10, screen)
+                IF 
+                  table[j][cout] = infini
+                    out.string ("infini",9, screen)
+                  TRUE
+                    out.number (table[j][cout], 2, screen)
+                screen ! '*n'
+:    
+  
+--procedure définissant un routeur
+PROC routeur (VAL INT id, [] CHAN OF TABROUTE in, [] CHAN OF TABROUTE out,CHAN OF TABROUTE screenOut )
+  TABROUTE tableLoc:
+  [maxVois] TABROUTE tableVois:
+  SEQ
+   --initialisation des tables
+    WHILE TRUE
+      SEQ
+        --communications
+        --changement d'etat de la table locale
+        --affichage de la table locale
+        screenOut ! tableLoc
+: 
+
+--procedure pour la definition d'un reseau (avec exemple de codage incomplet)
+PROC reseau(CHAN OF BYTE keyboard,screen,error)
+  [7]CHAN OF TABROUTE dummyScreen:
+  [???????]CHAN OF TABROUTE lien: --la taille du tableau (nombre de liens) dépend de la topologie
+  --exemple de codage pour connecter les noeuds
+  r0In IS [lien[1], lien[11]]:
+  r1In IS [lien[0], lien[3], lien[5]]:
+  
+  r0Out IS [lien[0], lien[10]]:
+  r1Out IS [lien[1], lien[2], lien[4]]:
+  
+  PAR
+    --exemple avec 2 noeuds
+    ringScreen(dummyScreen,screen)
+    routeur(0,r0In,r0Out,dummyScreen[0])
+    routeur(1,r1In,r1Out,dummyScreen[1])
+    ...
+:
+

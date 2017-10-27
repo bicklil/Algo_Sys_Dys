@@ -3,47 +3,15 @@
 VAL INT null IS (-1):
 VAL INT jeton IS (-2):
 PROTOCOL print IS INT;INT;BOOL;INT:
+PROTOCOL election IS INT;BOOL:
 
-PROC nodeInRing(CHAN OF INT in,out, CHAN OF print aff, VAL INT id,VAL INT nb)
+PROC nodeInRing(CHAN OF INT in,out,CHAN OF election ine,oute, CHAN OF print aff, VAL INT id,VAL INT nb)
   INT messIn, messOut,cpt,idLeader:
   BOOL IsLeader:
   SEQ
-    idLeader := null
-    messOut := nb
-    IsLeader := FALSE
-    SEQ i=0 FOR 4
-      SEQ
-        PAR
-          in ? messIn
-          out ! messOut
-        IF
-          messIn > nb
-            messOut := messIn
-          messIn = nb
-            IsLeader := TRUE
-          messIn < nb
-            messOut := null
     
-    IF
-      IsLeader
-        SEQ
-          idLeader := id
-          messOut := id
-      TRUE
-        messOut := null
-    SEQ
-      SEQ i=0 FOR 4
-        SEQ
-          PAR
-            in ? messIn
-            out ! messOut
-          IF
-            messIn <> null
-              SEQ
-                idLeader := messIn
-                messOut := idLeader
-            TRUE
-              messOut := null
+    
+    
     IF
       IsLeader
         messOut := jeton
@@ -51,7 +19,7 @@ PROC nodeInRing(CHAN OF INT in,out, CHAN OF print aff, VAL INT id,VAL INT nb)
         messOut := null
 
     cpt := 0
-    SEQ i=0 FOR 10
+    SEQ i=0 FOR 100
       SEQ
         PAR
           in ? messIn
@@ -88,10 +56,11 @@ PROC ringScreen([] CHAN OF print entree, CHAN OF BYTE sortie)
 PROC MAIN(CHAN OF BYTE in,out,err)
   [4] CHAN OF print screenChan:
   [4] CHAN OF INT nodeChan:
+  [4] CHAN OF election eleChan
   PAR
-    nodeInRing(nodeChan[3],nodeChan[0],screenChan[0],0,12)
-    nodeInRing(nodeChan[0],nodeChan[1],screenChan[1],1,42)
-    nodeInRing(nodeChan[1],nodeChan[2],screenChan[2],2,17)
-    nodeInRing(nodeChan[2],nodeChan[3],screenChan[3],3,5)
+    nodeInRing(nodeChan[3],nodeChan[0],eleChan[3],eleChan[0],screenChan[0],0,12)
+    nodeInRing(nodeChan[0],nodeChan[1],eleChan[0],eleChan[1],screenChan[1],1,42)
+    nodeInRing(nodeChan[1],nodeChan[2],eleChan[1],eleChan[2],screenChan[2],2,17)
+    nodeInRing(nodeChan[2],nodeChan[3],eleChan[2],eleChan[3],screenChan[3],3,5)
     ringScreen(screenChan,out)
 :
