@@ -64,8 +64,10 @@ PROC routeur (VAL INT id, [] CHAN OF TABROUTE in, [] CHAN OF TABROUTE out,CHAN O
     SEQ i=0 FOR SIZE tableLoc
       IF
         i = id
+          tableLoc[i][indVois] := -1
           tableLoc[i][cout] := 0
         TRUE
+          tableLoc[i][indVois] := -1
           tableLoc[i][cout] := 16
 
     WHILE TRUE
