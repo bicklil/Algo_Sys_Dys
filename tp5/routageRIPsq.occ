@@ -21,13 +21,20 @@ DATA TYPE TABROUTE IS [7] INFOROUTE:
 --affiche la table de routage d'un noeud 
 PROC ringScreen([] CHAN OF  TABROUTE theirScreens, CHAN OF BYTE screen)
   TABROUTE table:
+  [7]INT compteur:
   SEQ
+    SEQ i=0 FOR SIZE compteur
+      compteur[i] := 0
     WHILE TRUE
       ALT i=0 FOR SIZE theirScreens
         theirScreens[i] ? table
           SEQ
+            compteur[i] := compteur[i] +1
             out.string ("table du routeur :", 10, screen)
             out.number (i, 2, screen)
+            screen ! '*n'
+            out.string("modification numero : ",10,screen)
+            out.number(compteur[i],2,screen)
             screen ! '*n'
             SEQ j=0 FOR 7
               SEQ
@@ -44,38 +51,82 @@ PROC ringScreen([] CHAN OF  TABROUTE theirScreens, CHAN OF BYTE screen)
                   TRUE
                     out.number (table[j][cout], 2, screen)
                 screen ! '*n'
+            screen ! '*n'
 :    
   
 --procedure définissant un routeur
 PROC routeur (VAL INT id, [] CHAN OF TABROUTE in, [] CHAN OF TABROUTE out,CHAN OF TABROUTE screenOut )
   TABROUTE tableLoc:
   [maxVois] TABROUTE tableVois:
+  BOOL modif:
   SEQ
-   --initialisation des tables
+  --initialisation des tables
+    SEQ i=0 FOR SIZE tableLoc
+      IF
+        i = id
+          tableLoc[i][cout] := 0
+        TRUE
+          tableLoc[i][cout] := 16
+
     WHILE TRUE
       SEQ
-        --communications
-        --changement d'etat de la table locale
-        --affichage de la table locale
-        screenOut ! tableLoc
+        modif := FALSE
+      -- communications
+        PAR
+          PAR i=0 FOR SIZE out
+            out[i] ! tableLoc
+          PAR i=0 FOR SIZE in
+            in[i] ? tableVois[i]
+
+      --changement d'etat de la table locale
+        SEQ i=0 FOR SIZE in
+          SEQ j=0 FOR 7
+            IF
+              tableLoc[j][cout] > (tableVois[i][j][cout] +1)
+                SEQ
+                  tableLoc[j][cout] := (tableVois[i][j][cout]+1)
+                  tableLoc[j][indVois] := i
+                  modif := TRUE
+              TRUE
+                SKIP
+        IF
+          modif
+            screenOut ! tableLoc
+          TRUE
+            SKIP
 : 
 
 --procedure pour la definition d'un reseau (avec exemple de codage incomplet)
 PROC reseau(CHAN OF BYTE keyboard,screen,error)
   [7]CHAN OF TABROUTE dummyScreen:
-  [???????]CHAN OF TABROUTE lien: --la taille du tableau (nombre de liens) dépend de la topologie
+  [16]CHAN OF TABROUTE lien: --la taille du tableau (nombre de liens) dépend de la topologie
   --exemple de codage pour connecter les noeuds
-  r0In IS [lien[1], lien[11]]:
-  r1In IS [lien[0], lien[3], lien[5]]:
+  r0In IS [lien[13], lien[15]]:
+  r1In IS [lien[1], lien[3]]:
+  r2In IS [lien[4], lien[6]]:
+  r3In IS [lien[10], lien[11],lien[14]]:
+  r4In IS [lien[2], lien[7]]:
+  r5In IS [lien[5], lien[8], lien[9]]:
+  r6In IS [lien[0], lien[12]]:
   
-  r0Out IS [lien[0], lien[10]]:
-  r1Out IS [lien[1], lien[2], lien[4]]:
+  r0Out IS [lien[0], lien[14]]:
+  r1Out IS [lien[2], lien[4]]:
+  r2Out IS [lien[3], lien[5]]:
+  r3Out IS [lien[9], lien[12],lien[13]]:
+  r4Out IS [lien[1], lien[8]]:
+  r5Out IS [lien[6], lien[7], lien[10]]:
+  r6Out IS [lien[11], lien[15]]:
+
   
   PAR
     --exemple avec 2 noeuds
     ringScreen(dummyScreen,screen)
     routeur(0,r0In,r0Out,dummyScreen[0])
     routeur(1,r1In,r1Out,dummyScreen[1])
-    ...
+    routeur(2,r2In,r2Out,dummyScreen[2])
+    routeur(3,r3In,r3Out,dummyScreen[3])
+    routeur(4,r4In,r4Out,dummyScreen[4])
+    routeur(5,r5In,r5Out,dummyScreen[5])
+    routeur(6,r6In,r6Out,dummyScreen[6])
 :
 
